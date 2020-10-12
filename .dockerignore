@@ -2,7 +2,7 @@
 .gitignore
 .gitlab-ci.yml
 *.md
-*.yml
+_*.yml
 *.ipynb
 # ignore .git and .cache folders
 .git

@@ -4,7 +4,7 @@
 
 # Particle Physics and Machine Learning
 
-Data science capstone (https://dsc-capstone.github.io/) particle physics domain of inquiry (DSC 180AB B06).
+UCSD Data Science Capstone (https://dsc-capstone.github.io/) particle physics domain (DSC 180AB B06).
 
 Developed by Javier Duarte <https://orcid.org/0000-0002-5076-7096>, Frank Würthwein <https://orcid.org/0000-0001-5912-6124>.
 
@@ -18,7 +18,7 @@ particle physics data.
 ## Result Replication
 
 The bulk of the first half of the project will focus on the task of
-identying Higgs boson decaying to bottom quarks. Specifically, reproducing 
+identifying Higgs boson decaying to bottom quarks. Specifically, reproducing 
 (or surpassing) results in this paper (not necessarily with the same ML technique):
 * [Interaction networks for the identification of boosted \\(H \to b\bar{b}\\)](https://arxiv.org/abs/1909.12285)
 

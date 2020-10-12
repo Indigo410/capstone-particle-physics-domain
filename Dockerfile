@@ -1,15 +1,15 @@
-FROM gitlab-registry.nautilus.optiputer.net/prp/jupyterlab:latest
+FROM ucsdets/scipy-ml-notebook:2020.2.9
 
 LABEL maintainer="Javier Duarte <jduarte@ucsd.edu>"
 
 USER root
-WORKDIR /root
+#WORKDIR /root
 
 # Install cmake and XRootD
 RUN apt-get update && \
     apt-get upgrade -qq -y && \
     apt-get install -qq -y \
-    python-pip \
+    python3-pip \
     cmake && \
     apt-get -y autoclean && \
     apt-get -y autoremove && \
@@ -21,35 +21,36 @@ RUN bash install_xrootd.sh && \
 ENV PATH /opt/xrootd/bin:${PATH}
 ENV LD_LIBRARY_PATH /opt/xrootd/lib
 
+RUN conda install -n ml-latest -c conda-forge uproot xrootd scikit-learn matplotlib tqdm 
+
+# Create the environment:
+SHELL ["conda", "run", "-n", "ml-latest", "/bin/bash", "-c"]
+
+ENV CUDA=cu101
+
+ENV TORCH=1.5.0
+
+RUN pip install torch-scatter==latest+${CUDA} -f https://pytorch-geometric.com/whl/torch-${TORCH}.html \
+    && pip install torch-sparse==latest+${CUDA}  -f https://pytorch-geometric.com/whl/torch-${TORCH}.html \
+    && pip install torch-cluster==latest+${CUDA}  -f https://pytorch-geometric.com/whl/torch-${TORCH}.html \
+    && pip install torch-spline-conv==latest+${CUDA}  -f https://pytorch-geometric.com/whl/torch-${TORCH}.html \
+    && pip install torch-geometric
+    && pip install -U jupyter-book
+
+
+ADD fix-permissions fix-permissions
+
+RUN chmod +x fix-permissions
+
+RUN fix-permissions /home/$NB_USER
+
+RUN echo "jovyan ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
+    usermod -aG sudo jovyan && \
+    usermod -aG root jovyan
+
+#EXPOSE 8888
+
 USER $NB_USER
 WORKDIR /home/$NB_USER
 
 ENV USER=${NB_USER}
-
-RUN set -x \
-    && pip install coffea tables mplhep setGPU comet_ml llvmlite --ignore-installed \
-    && pip install tqdm PyYAML uproot lz4 xxhash \
-    && pip install tables \
-    && pip install onnxruntime-gpu \
-    && pip install -U jupyter-book
-
-RUN set -x \ 
-    && conda install -c conda-forge xrootd -y
-
-ENV CUDA=cu102
-
-ENV TORCH=1.5.0
-
-ENV TORCH_CUDA_ARCH_LIST=6.0,7.0
-    
-RUN set -x \
-    && pip install torch-scatter==latest+${CUDA} -f https://pytorch-geometric.com/whl/torch-${TORCH}.html \
-    && pip install torch-sparse==latest+${CUDA}  -f https://pytorch-geometric.com/whl/torch-${TORCH}.html \
-    && pip install torch-cluster==latest+${CUDA}  -f https://pytorch-geometric.com/whl/torch-${TORCH}.html \
-    && pip install torch-spline-conv==latest+${CUDA}  -f https://pytorch-geometric.com/whl/torch-${TORCH}.html \
-    && pip install torch-geometric \ 
-    && pip install dgl-$CUDA \
-    && pip install tfdlpack-gpu
-
-RUN set -x \
-    && fix-permissions /home/$NB_USER

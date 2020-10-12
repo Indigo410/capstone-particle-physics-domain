@@ -1,8 +1,10 @@
 name: analysis
 channels:
     - conda-forge
+    - defaults
 dependencies:
-    - numpy==1.16.4
+    - python=3.7
+    - numpy=1.16.4
     - uproot
     - tensorflow
     - keras
@@ -13,8 +15,8 @@ dependencies:
     - pip
     - pip:
       - jupyter-book
-      - https://pytorch-geometric.com/whl/torch-1.5.0/torch_scatter-latest%2Bcpu-cp37-cp37m-linux_x86_64.whl      
-      - https://pytorch-geometric.com/whl/torch-1.5.0/torch_sparse-latest%2Bcpu-cp37-cp37m-linux_x86_64.whl
-      - https://pytorch-geometric.com/whl/torch-1.5.0/torch_cluster-latest%2Bcpu-cp37-cp37m-linux_x86_64.whl
-      - https://pytorch-geometric.com/whl/torch-1.5.0/torch_spline_conv-latest%2Bcpu-cp37-cp37m-linux_x86_64.whl      
+      - https://pytorch-geometric.com/whl/torch-1.5.0/torch_scatter-latest%2Bcu101-cp37-cp37m-linux_x86_64.whl      
+      - https://pytorch-geometric.com/whl/torch-1.5.0/torch_sparse-latest%2Bcu101-cp37-cp37m-linux_x86_64.whl
+      - https://pytorch-geometric.com/whl/torch-1.5.0/torch_cluster-latest%2Bcu101-cp37-cp37m-linux_x86_64.whl
+      - https://pytorch-geometric.com/whl/torch-1.5.0/torch_spline_conv-latest%2Bcu101-cp37-cp37m-linux_x86_64.whl      
       - torch-geometric
