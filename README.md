@@ -27,6 +27,9 @@ This implies reproducing Figure 4, Figure 5, and if time permits Figure 8 in thi
 The latter-half of Quarter 1 will introduce you to further topics to inform possible
 avenues for further research.
 
+The report can be produced in a 4-page 2-column Physical Review Letters (PRL) format. The LaTeX package (RevTeX) can be found here: <https://journals.aps.org/revtex>
+More information can be found here: https://journals.aps.org/prl/authors
+
 ## Section Participation
 
 Participation in the weekly discussion section is *mandatory*. Each
@@ -59,9 +62,16 @@ end of the quarter.
 |9|[Application to Real Data](weeks/09.md)|
 |10|Present Proposals|
 
+## Discussion
+
+Wed: 3:00 - 3:50 pm
+
 ## Office Hours
 
+Farouk Mokhtar 
+Wed: 10:00 - 11:00 am
+Fri: 1:00 - 2:00 pm
+Sign up here: https://calendly.com/fmokhtar/dsc-180a-office-hour
 
-
-
+## Lab
 

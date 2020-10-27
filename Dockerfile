@@ -34,7 +34,7 @@ RUN pip install torch-scatter==latest+${CUDA} -f https://pytorch-geometric.com/w
     && pip install torch-sparse==latest+${CUDA}  -f https://pytorch-geometric.com/whl/torch-${TORCH}.html \
     && pip install torch-cluster==latest+${CUDA}  -f https://pytorch-geometric.com/whl/torch-${TORCH}.html \
     && pip install torch-spline-conv==latest+${CUDA}  -f https://pytorch-geometric.com/whl/torch-${TORCH}.html \
-    && pip install torch-geometric
+    && pip install torch-geometric \
     && pip install -U jupyter-book
 
 
@@ -44,9 +44,9 @@ RUN chmod +x fix-permissions
 
 RUN fix-permissions /home/$NB_USER
 
-RUN echo "jovyan ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
-    usermod -aG sudo jovyan && \
-    usermod -aG root jovyan
+#RUN echo "jovyan ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
+#    usermod -aG sudo jovyan && \
+#    usermod -aG root jovyan
 
 #EXPOSE 8888
 
