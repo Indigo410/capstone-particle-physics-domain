@@ -8,22 +8,27 @@ import glob
 import multiprocessing
 from pathlib import Path
 import tqdm
+import yaml
 
 class GraphDataset(Dataset):
     def __init__(self, root, features, labels, spectators, transform=None, pre_transform=None,
-                 n_events=-1, n_events_merge=1000):
+                 n_events=-1, n_events_merge=1000, file_names=None, remove_unlabeled=True):
         """
         Initialize parameters of graph dataset
         Args:
             root (str): path
             n_events (int): how many events to process (-1=all)
             n_events_merge (int): how many events to merge
+            file_names (list of strings): file names
+            remove_unlabeled (boolean): remove unlabeled data samples
         """
         self.features = features
         self.labels = labels
         self.spectators = spectators
         self.n_events = n_events
         self.n_events_merge = n_events_merge
+        self.file_names = file_names
+        self.remove_unlabeled = remove_unlabeled
         super(GraphDataset, self).__init__(root, transform, pre_transform)
 
     @property
@@ -31,9 +36,10 @@ class GraphDataset(Dataset):
         """
         Determines which file is being processed
         """
-        files = ['root://eospublic.cern.ch//eos/opendata/cms/datascience/HiggsToBBNtupleProducerTool/HiggsToBBNTuple_HiggsToBB_QCD_RunII_13TeV_MC/train/ntuple_merged_10.root']
-
-        return files
+        if self.file_names is None:
+            return ['root://eospublic.cern.ch//eos/opendata/cms/datascience/HiggsToBBNtupleProducerTool/HiggsToBBNTuple_HiggsToBB_QCD_RunII_13TeV_MC/train/ntuple_merged_10.root']
+        else:
+            return self.file_names
 
     @property
     def processed_file_names(self):
@@ -86,20 +92,22 @@ class GraphDataset(Dataset):
             spec_array = tree.arrays(branches=self.spectators,
                                      entrystop=self.n_events,
                                      namedecode='utf-8')
-            z = np.stack([spec_array[spec] for spec in self.spectators],axis=1)
-
+            z = np.stack([spec_array[spec] for spec in self.spectators],axis=1)            
 
             for i in tqdm.tqdm(range(n_samples)):
                 if i%self.n_events_merge == 0:
-                    datas = []
+                    datas = []                    
+                if self.remove_unlabeled:
+                    if np.sum(y[i:i+1],axis=1)==0:
+                        continue
                 n_particles = len(feature_array[self.features[0]][i])
-                if n_particles==0: continue
+                if n_particles<2: continue
                 pairs = np.stack([[m, n] for (m, n) in itertools.product(range(n_particles),range(n_particles)) if m!=n])
                 edge_index = torch.tensor(pairs, dtype=torch.long)
                 edge_index=edge_index.t().contiguous()
                 x = torch.tensor([feature_array[feat][i] for feat in self.features], dtype=torch.float).T
                 u = torch.tensor(z[i], dtype=torch.float)
-                data = Data(x=x, edge_index=edge_index, y=torch.tensor(y[i:i+1],dtype=torch.int))
+                data = Data(x=x, edge_index=edge_index, y=torch.tensor(y[i:i+1],dtype=torch.long))
                 data.u = torch.unsqueeze(u, 0)
                 if self.pre_filter is not None and not self.pre_filter(data):
                     continue
@@ -124,68 +132,14 @@ if __name__ == "__main__":
     parser.add_argument("--n-events-merge", type=int, default=1000, help="number of events to merge")
     args = parser.parse_args()
 
-    # 48 track-level features
-    features = ['track_pt',
-            'track_ptrel',
-            'trackBTag_Eta',
-            'trackBTag_DeltaR',
-            'trackBTag_EtaRel',
-            'trackBTag_JetDistVal',
-            'trackBTag_Momentum',
-            'trackBTag_PPar',
-            'trackBTag_PParRatio',
-            'trackBTag_PtRatio',
-            'trackBTag_PtRel',
-            'trackBTag_Sip2dSig',
-            'trackBTag_Sip2dVal',
-            'trackBTag_Sip3dSig',
-            'trackBTag_Sip3dVal',
-            'track_VTX_ass',
-            'track_charge',
-            'track_deltaR',
-            'track_detadeta',
-            'track_dlambdadz',
-            'track_dlambdadz',
-            'track_dphidphi',
-            'track_dphidxy',
-            'track_dptdpt',
-            'track_drminsv',
-            'track_drsubjet1',
-            'track_drsubjet2',
-            'track_dxy',
-            'track_dxydxy',
-            'track_dxydz',
-            'track_dxysig',
-            'track_dz',
-            'track_dzdz',        
-            'track_dzsig',
-            'track_erel',
-            'track_etarel',
-            'track_fromPV',
-            'track_isChargedHad',
-            'track_isEl',
-            'track_isMu',
-            'track_lostInnerHits',
-            'track_mass',
-            'track_normchi2',            
-            'track_phirel',
-            'track_pt',
-            'track_ptrel',
-            'track_puppiw',
-            'track_quality']
-
-    # spectators to define mass/pT window
-    spectators = ['fj_sdmass',
-                  'fj_pt']
-
-    # 2 labels: QCD or Hbb (we'll reduce the following labels)
-    labels =  ['label_QCD_b',
-               'label_QCD_bb',
-               'label_QCD_c',
-               'label_QCD_cc',
-               'label_QCD_others',
-               'sample_isQCD',
-               'label_H_bb']
+    with open('definitions.yml') as file:
+        # The FullLoader parameter handles the conversion from YAML
+        # scalar values to Python the dictionary format
+        definitions = yaml.load(file, Loader=yaml.FullLoader)
+    
+    features = definitions['features']
+    spectators = definitions['spectators']
+    labels = definitions['labels']
 
     gdata = GraphDataset(args.dataset, features, labels, spectators,
                          n_events=args.n_events,

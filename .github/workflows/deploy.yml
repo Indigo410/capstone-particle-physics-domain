@@ -17,7 +17,7 @@ jobs:
     - name: Setup Miniconda
       uses: conda-incubator/setup-miniconda@v1.7.0
       with:
-        activate-environment: analysis
+        activate-environment: ml-latest
         environment-file: environment.yml
         python-version: 3.7
         auto-activate-base: false
